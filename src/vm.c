@@ -40,6 +40,7 @@ static Value clockNative(int arg_count, Value *args) {
 static void resetStack() {
     vm.sp = vm.stack;
     vm.frame_count = 0;
+    vm.open_upvalues = NULL;
 }
 
 static void runtimeError(const char *format, ...) {
@@ -132,6 +133,39 @@ static bool callValue(Value callee, int arg_count) {
     }
     runtimeError("Can't call non-function values");
     return false;
+}
+
+static ObjUpvalue *captureUpvalue(Value *local) {
+    ObjUpvalue *prev_upvalue = NULL;
+    ObjUpvalue *upvalue = vm.open_upvalues;
+    while (upvalue != NULL && upvalue->location > local) {
+        prev_upvalue = upvalue;
+        upvalue = upvalue->next;
+    }
+
+    if (upvalue != NULL && upvalue->location == local) {
+        return upvalue;
+    }
+    
+    ObjUpvalue *created_upvalue = newUpvalue(local);
+    created_upvalue->next = upvalue;
+
+    if (prev_upvalue == NULL) {
+        vm.open_upvalues = created_upvalue;
+    } else {
+        prev_upvalue->next = created_upvalue;
+    }
+    
+    return created_upvalue;
+}
+
+static void closeUpvalues(Value *last) {
+    while (vm.open_upvalues != NULL && vm.open_upvalues->location >= last) {
+        ObjUpvalue *upvalue = vm.open_upvalues;
+        upvalue->closed = *upvalue->location;
+        upvalue->location = &upvalue->closed;
+        vm.open_upvalues = upvalue->next;
+    }
 }
 
 static bool isFalsey(Value value) {
@@ -266,7 +300,7 @@ static InterpretResult run() {
             printf(" ]");
         }
         printf("\n");
-        disassembleInstruction(&frame->closure->function->chunk, (int)(frame->ip - frame->function->chunk.code));
+        disassembleInstruction(&frame->closure->function->chunk, (int)(frame->ip - frame->closure->function->chunk.code));
 #endif
         uint8_t instruction;
         switch (instruction = READ_BYTE()) {
@@ -311,6 +345,16 @@ static InterpretResult run() {
                     runtimeError("Undefined variable '%s'", name->chars);
                     return INTERPRET_RUNTIME_ERROR;
                 }
+                break;
+            }
+            case OP_GET_UPVALUE: {
+                uint8_t slot = READ_BYTE();
+                push(*frame->closure->upvalues[slot]->location);
+                break;
+            }
+            case OP_SET_UPVALUE: {
+                uint8_t slot = READ_BYTE();
+                *frame->closure->upvalues[slot]->location = peek(0);
                 break;
             }
             case OP_EQUAL: {
@@ -385,10 +429,24 @@ static InterpretResult run() {
                 ObjFunction *function = AS_FUNCTION(READ_CONSTANT());
                 ObjClosure *closure = newClosure(function);
                 push(OBJ_VAL(closure));
+                for (int i = 0; i < closure->upvalue_count; i++) {
+                    uint8_t is_local = READ_BYTE();
+                    uint8_t index = READ_BYTE();
+                    if (is_local) {
+                        closure->upvalues[i] = captureUpvalue(frame->slots + index);
+                    } else {
+                        closure->upvalues[i] = frame->closure->upvalues[index];
+                    }
+                }
                 break;
             }
+            case OP_CLOSE_UPVALUE:
+                closeUpvalues(vm.sp - 1);
+                pop();
+                break;
             case OP_RETURN:
                 Value result = pop();
+                closeUpvalues(frame->slots);
                 vm.frame_count--;
                 if (vm.frame_count == 0) {
                     pop();

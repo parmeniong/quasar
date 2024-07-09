@@ -72,6 +72,8 @@ int disassembleInstruction(Chunk *chunk, int offset) {
             
             return offset;
         }
+        case OP_CLOSE_UPVALUE:
+            return simpleInstruction("CLOSE_UPVALUE", offset);
         case OP_RETURN:
             return simpleInstruction("RETURN", offset);
         case OP_CONSTANT:
