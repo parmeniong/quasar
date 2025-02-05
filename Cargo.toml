@@ -1,0 +1,12 @@
+[package]
+name = "quasar"
+version = "0.1.0"
+authors = ["Graikos Parmenion"]
+description = "A simple programming language"
+categories = ["compilers"]
+repository = "https://github.com/parmeniong/quasar.git"
+license = "MIT"
+keywords = ["language", "interpreter"]
+edition = "2021"
+
+[dependencies]
