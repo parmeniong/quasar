@@ -1,3 +1,5 @@
+use crate::value::Value;
+
 pub enum OpCode {
     Return
 }
@@ -12,18 +14,24 @@ impl OpCode {
 }
 
 pub struct Block {
-    code: Vec<u8>
+    code: Vec<u8>,
+    constants: Vec<Value>
 }
 
 impl Block {
     pub fn new() -> Self {
         Self {
-            code: Vec::new()
+            code: Vec::new(),
+            constants: Vec::new()
         }
     }
 
     pub fn push(&mut self, byte: u8) {
         self.code.push(byte);
+    }
+
+    pub fn push_constant(&mut self, value: Value) {
+        self.constants.push(value);
     }
 
     #[cfg(debug_assertions)]
