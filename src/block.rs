@@ -14,7 +14,7 @@ impl OpCode {
 }
 
 pub struct Block {
-    code: Vec<u8>,
+    pub code: Vec<u8>,
     constants: Vec<Value>
 }
 

@@ -1,5 +1,6 @@
 mod block;
 mod value;
+mod vm;
 
 use clap::Parser;
 use std::path::PathBuf;
