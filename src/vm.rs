@@ -1,4 +1,5 @@
 use crate::block::{Block, OpCode};
+use crate::value::Value;
 
 pub enum InterpretResult {
     Ok,
@@ -7,13 +8,15 @@ pub enum InterpretResult {
 }
 
 pub struct VM {
-    block: Block
+    block: Block,
+    stack: Vec<Value>
 }
 
 impl VM {
     pub fn new() -> Self {
         Self {
-            block: Block::new()
+            block: Block::new(),
+            stack: Vec::new()
         }
     }
 
