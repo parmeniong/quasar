@@ -2,6 +2,7 @@ mod block;
 mod value;
 mod vm;
 mod lexer;
+mod compiler;
 
 use clap::Parser;
 use std::path::PathBuf;
