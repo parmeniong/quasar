@@ -1,4 +1,4 @@
-use crate::lexer::Token;
+use crate::lexer::{Lexer, Token};
 use crate::block::Block;
 
 pub struct Parser {
@@ -15,14 +15,19 @@ impl Parser {
     }
 }
 
-pub struct Compiler;
+pub struct Compiler<'a> {
+    lexer: Option<Lexer<'a>>
+}
 
-impl Compiler {
+impl<'a> Compiler<'a> {
     pub fn new() -> Self {
-        Self
+        Self {
+            lexer: None
+        }
     }
 
-    pub fn compile(&self, source: String) -> Block {
+    pub fn compile(&mut self, source: &'a String) -> Block {
+        self.lexer = Some(Lexer::new(source));
         todo!();
     }
 }
