@@ -1,4 +1,5 @@
 use crate::lexer::Token;
+use crate::block::Block;
 
 pub struct Parser {
     current: Option<Token>,
@@ -19,5 +20,9 @@ pub struct Compiler;
 impl Compiler {
     pub fn new() -> Self {
         Self
+    }
+
+    pub fn compile(&self, source: String) -> Block {
+        todo!();
     }
 }
