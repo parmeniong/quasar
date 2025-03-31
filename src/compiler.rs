@@ -16,13 +16,15 @@ impl Parser {
 }
 
 pub struct Compiler<'a> {
-    lexer: Option<Lexer<'a>>
+    lexer: Option<Lexer<'a>>,
+    parser: Option<Parser>
 }
 
 impl<'a> Compiler<'a> {
     pub fn new() -> Self {
         Self {
-            lexer: None
+            lexer: None,
+            parser: None
         }
     }
 
