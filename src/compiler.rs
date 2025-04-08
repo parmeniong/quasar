@@ -1,14 +1,16 @@
 use crate::lexer::{Lexer, Token};
 use crate::block::Block;
 
-pub struct Parser {
+pub struct Parser<'a> {
+    lexer: Lexer<'a>,
     current: Option<Token>,
     previous: Option<Token>
 }
 
-impl Parser {
-    pub fn new() -> Self {
+impl<'a> Parser<'a> {
+    pub fn new(source: &'a String) -> Self {
         Self {
+            lexer: Lexer::new(source),
             current: None,
             previous: None
         }
@@ -16,20 +18,17 @@ impl Parser {
 }
 
 pub struct Compiler<'a> {
-    lexer: Option<Lexer<'a>>,
-    parser: Option<Parser>
+    parser: Parser<'a>
 }
 
 impl<'a> Compiler<'a> {
-    pub fn new() -> Self {
+    pub fn new(source: &'a String) -> Self {
         Self {
-            lexer: None,
-            parser: None
+            parser: Parser::new(&source)
         }
     }
 
-    pub fn compile(&mut self, source: &'a String) -> Block {
-        self.lexer = Some(Lexer::new(source));
+    pub fn compile(&mut self) -> Block {
         todo!();
     }
 }
